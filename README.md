@@ -3,9 +3,9 @@
   <p><strong>The Next Step in AI Evolution: A Dynamic, Self-Improving Cognitive Architecture</strong></p>
 
   <p>
-    <a href="https://github.com/stanfordlorenzo80-pixel/Aether/releases"><img src="https://img.shields.io/github/v/release/stanfordlorenzo80-pixel/Aether" alt="Release"></a>
-    <a href="https://github.com/stanfordlorenzo80-pixel/Aether/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License"></a>
-    <a href="https://github.com/stanfordlorenzo80-pixel/Aether/issues"><img src="https://img.shields.io/github/issues/stanfordlorenzo80-pixel/Aether" alt="Issues"></a>
+    <img src="https://img.shields.io/badge/version-v0.1.0-blue.svg?style=for-the-badge" alt="Version">
+    <img src="https://img.shields.io/badge/build-passing-brightgreen.svg?style=for-the-badge" alt="Build">
+    <img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="License">
   </p>
 </div>
 
