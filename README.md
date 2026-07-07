@@ -46,13 +46,16 @@ Aether isn’t just a terminal tool. It ships with a beautiful, dark-mode-first 
 
 ## 🚀 Quick Start
 
+> **Aether is designed for zero-friction deployment.** We've eliminated complex manual setups. Our intelligent bootloader safely isolates the Python cognitive engine into a virtual environment and seamlessly hooks it into the Tauri desktop shell.
+
 ### Prerequisites
 - [Node.js](https://nodejs.org/) (v18+)
 - [Rust](https://rustup.rs/)
 - [Python 3.10+](https://www.python.org/)
-- Anthropic API Key (or Ollama installed locally)
 
-### Installation
+### ⚡ The One-Click Launch
+
+We've bundled an automated launch script that handles **everything**—dependency resolution, virtual environment creation, background process orchestration, and IPC binding.
 
 1. **Clone the repository:**
    ```bash
@@ -60,26 +63,16 @@ Aether isn’t just a terminal tool. It ships with a beautiful, dark-mode-first 
    cd Aether
    ```
 
-2. **Set up the Python Engine:**
-   ```bash
-   cd engine
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install fastapi uvicorn anthropic networkx aiohttp
-   export ANTHROPIC_API_KEY="your-api-key-here"
-   ```
+2. **Add your API Key (Optional but recommended):**
+   *(If you prefer local models, Aether will auto-detect Ollama running on your machine).*
+   - **Windows:** `set ANTHROPIC_API_KEY=your-api-key-here`
+   - **Mac/Linux:** `export ANTHROPIC_API_KEY="your-api-key-here"`
 
-3. **Start the Engine:**
-   ```bash
-   python -m aether.server
-   ```
+3. **Ignite Aether:**
+   - **Windows:** Double-click `start.bat` (or run `.\start.bat` in terminal)
+   - **Mac/Linux:** Run `./start.sh`
 
-4. **Launch the Desktop App:**
-   In a new terminal window:
-   ```bash
-   npm install
-   npm run tauri dev
-   ```
+*That's it. The script will boot the Cortex engine, compile the UI, and launch the stunning desktop application automatically. When you close the app, the background engine shuts itself down cleanly.*
 
 ---
 
