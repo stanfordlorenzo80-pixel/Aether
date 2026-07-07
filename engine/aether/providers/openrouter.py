@@ -1,25 +1,39 @@
 import json
 import os
-from typing import AsyncGenerator
+import time
+from typing import List, AsyncGenerator, Tuple
 import aiohttp
 
-from aether.config import config
-from aether.providers.base import (
-    ConnectionStatus,
-    ModelInfo,
-    ModelProvider,
-    ProviderType,
-)
+from aether.providers.base import BaseProvider, ModelInfo
 
-class OpenRouterProvider(ModelProvider):
-    name = "openrouter"
-    provider_type = ProviderType.CLOUD
-
-    def __init__(self, api_key: str = ""):
-        self.api_key = api_key or getattr(config, "openrouter_api_key", os.environ.get("OPENROUTER_API_KEY", ""))
+class OpenRouterProvider(BaseProvider):
+    def __init__(self):
+        super().__init__("openrouter", "OpenRouter", "cloud")
+        self.api_key = ""
         self.base_url = "https://openrouter.ai/api/v1"
-        self._session: aiohttp.ClientSession | None = None
-        self._cached_models: list[ModelInfo] = []
+        self._session = None
+
+    async def initialize(self):
+        self.api_key = os.environ.get("OPENROUTER_API_KEY", "")
+        self.status = "connected" if self.api_key else "disconnected"
+        
+        if self.api_key:
+            try:
+                session = await self._get_session()
+                async with session.get(f"{self.base_url}/models", timeout=5) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        models = []
+                        for m in data.get("data", []):
+                            models.append(ModelInfo(
+                                id=m["id"],
+                                name=m.get("name", m["id"]),
+                                context_window=m.get("context_length", 8192),
+                                description="OpenRouter Model"
+                            ))
+                        self.models = models
+            except Exception:
+                pass
 
     async def _get_session(self) -> aiohttp.ClientSession:
         if self._session is None or self._session.closed:
@@ -32,50 +46,34 @@ class OpenRouterProvider(ModelProvider):
             )
         return self._session
 
-    async def test_connection(self) -> ConnectionStatus:
+    async def test_connection(self) -> Tuple[bool, float, str]:
         if not self.api_key:
-            return ConnectionStatus(connected=False, latency_ms=0, error="API key not configured")
+            return False, 0.0, "API key not configured"
         
+        start = time.time()
         try:
             session = await self._get_session()
             async with session.get(f"{self.base_url}/models", timeout=5) as resp:
+                latency = (time.time() - start) * 1000
                 if resp.status == 200:
-                    return ConnectionStatus(connected=True, latency_ms=0)
+                    self.status = "connected"
+                    return True, latency, ""
                 else:
-                    return ConnectionStatus(connected=False, latency_ms=0, error=f"HTTP {resp.status}")
+                    self.status = "error"
+                    return False, latency, f"HTTP {resp.status}"
         except Exception as e:
-            return ConnectionStatus(connected=False, latency_ms=0, error=str(e))
+            self.status = "error"
+            return False, 0.0, str(e)
 
-    async def list_models(self) -> list[ModelInfo]:
+    async def stream_chat(self, model_id: str, messages: List[dict]) -> AsyncGenerator[str, None]:
         if not self.api_key:
-            return []
-        
-        try:
-            session = await self._get_session()
-            async with session.get(f"{self.base_url}/models") as resp:
-                data = await resp.json()
-                models = []
-                for m in data.get("data", []):
-                    models.append(ModelInfo(
-                        id=m["id"],
-                        name=m.get("name", m["id"]),
-                        provider="openrouter",
-                        context_window=m.get("context_length", 8192)
-                    ))
-                self._cached_models = models
-                return models
-        except Exception:
-            return []
-
-    async def stream_chat(
-        self, model_id: str, messages: list[dict[str, str]], **kwargs
-    ) -> AsyncGenerator[str, None]:
+            raise ValueError("OpenRouter API key not configured")
+            
         session = await self._get_session()
         payload = {
             "model": model_id,
             "messages": messages,
             "stream": True,
-            **kwargs
         }
         
         async with session.post(f"{self.base_url}/chat/completions", json=payload) as resp:
@@ -91,6 +89,21 @@ class OpenRouterProvider(ModelProvider):
                         except:
                             pass
 
-    async def shutdown(self) -> None:
+    async def chat(self, model_id: str, messages: List[dict]) -> str:
+        if not self.api_key:
+            raise ValueError("OpenRouter API key not configured")
+            
+        session = await self._get_session()
+        payload = {
+            "model": model_id,
+            "messages": messages,
+            "stream": False,
+        }
+        
+        async with session.post(f"{self.base_url}/chat/completions", json=payload) as resp:
+            data = await resp.json()
+            return data["choices"][0]["message"]["content"]
+
+    async def shutdown(self):
         if self._session and not self._session.closed:
             await self._session.close()
