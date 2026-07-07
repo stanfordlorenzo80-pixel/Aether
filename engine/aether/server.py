@@ -8,9 +8,10 @@ import uvicorn
 
 from aether.memory import LocalVectorStore
 from aether.swarm import AetherSwarm
+from aether.providers.registry import ProviderRegistry
 
 app = FastAPI(title="Aether Engine", version="0.1.0")
-registry = ModelRegistry()
+registry = ProviderRegistry()
 memory_store = LocalVectorStore()
 swarm = AetherSwarm()
 
@@ -24,7 +25,6 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup_event():
-    # Registry auto-initializes and detects Ollama in background
     await registry.initialize()
 
 @app.get("/health")
@@ -34,14 +34,19 @@ async def health_check():
         "running": True,
         "version": "0.1.0",
         "uptime": 0, 
-        "providers": list(registry.providers.keys()),
+        "providers": [p["name"] for p in registry.list_providers()],
         "swarm_peers": len(swarm.peers),
         "memories": len(memory_store.memories)
     }
 
 @app.get("/api/models/providers")
 async def list_providers():
-    return registry.get_all_providers_info()
+    return registry.list_providers()
+
+@app.get("/api/models")
+async def list_models():
+    models = await registry.list_all_models()
+    return [{"id": m.id, "name": m.name, "provider": m.provider} for m in models]
 
 @app.post("/api/swarm/connect")
 async def connect_peer(request: Request):
@@ -53,9 +58,12 @@ async def connect_peer(request: Request):
     return {"connected": True, "peers": peers}
 
 @app.post("/api/models/test/{provider_id}")
-async def test_provider(provider_id: string):
-    success, latency, err = await registry.test_connection(provider_id)
-    return {"connected": success, "latency": latency, "error": err}
+async def test_provider(provider_id: str):
+    provider = registry.get_provider(provider_id)
+    if not provider:
+        return {"connected": False, "latency": 0, "error": "Not found"}
+    status = await provider.test_connection()
+    return {"connected": status.connected, "latency": status.latency_ms, "error": status.error}
 
 @app.post("/api/chat/completions")
 async def chat_completions(request: Request):
@@ -64,14 +72,10 @@ async def chat_completions(request: Request):
     model_id = body.get("model")
     stream = body.get("stream", False)
     
-    # Simple parse to find the provider
-    provider_id = "claude" # default
-    for pid, provider in registry.providers.items():
-        if any(m.id == model_id for m in provider.models):
-            provider_id = pid
-            break
+    provider = registry.resolve_provider_for_model(model_id)
+    if not provider:
+        provider = registry.get_provider("claude") or registry.get_provider("openrouter") or registry.get_provider("ollama")
             
-    # Store user query to Long-Term Memory
     if messages:
         last_msg = messages[-1].get("content", "")
         if last_msg:
@@ -80,7 +84,7 @@ async def chat_completions(request: Request):
     if stream:
         async def event_generator() -> AsyncGenerator[str, None]:
             try:
-                async for chunk in registry.stream_chat(provider_id, model_id, messages):
+                async for chunk in provider.stream_chat(model_id, messages):
                     yield f"data: {json.dumps({'type': 'content', 'content': chunk})}\n\n"
                 yield "data: [DONE]\n\n"
             except Exception as e:
@@ -88,8 +92,7 @@ async def chat_completions(request: Request):
         
         return StreamingResponse(event_generator(), media_type="text/event-stream")
     else:
-        # Non-streaming fallback
-        pass
+        return {"choices": [{"message": {"content": "Non-streaming not fully implemented yet."}}]}
 
 if __name__ == "__main__":
     uvicorn.run("aether.server:app", host="127.0.0.1", port=8420, reload=True)

@@ -13,6 +13,7 @@ from aether.providers.base import (
 )
 from aether.providers.claude import ClaudeProvider
 from aether.providers.ollama import OllamaProvider
+from aether.providers.openrouter import OpenRouterProvider
 
 logger = logging.getLogger(__name__)
 
@@ -155,6 +156,16 @@ class ProviderRegistry:
         else:
             # Debug-level only — missing Ollama is perfectly normal.
             logger.debug("Ollama not detected — skipping local provider")
+            
+        # ── OpenRouter ──────────────────────────────────────────────────
+        openrouter = OpenRouterProvider()
+        self.register(openrouter)
+        openrouter_status = await openrouter.test_connection()
+        self._connection_status["openrouter"] = openrouter_status
+        if openrouter_status.connected:
+            logger.info("✓ OpenRouter connected (%.0fms)", openrouter_status.latency_ms)
+        else:
+            logger.warning("✗ OpenRouter not connected: %s", openrouter_status.error)
 
         connected = [n for n, s in self._connection_status.items() if s.connected]
         logger.info("Registry ready — %d provider(s) connected: %s", len(connected), ", ".join(connected) or "none")

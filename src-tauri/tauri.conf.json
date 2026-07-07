@@ -30,6 +30,10 @@
   },
   "bundle": {
     "active": true,
+    "icon": [
+      "icons/icon.ico",
+      "icons/icon.png"
+    ],
     "externalBin": [
       "bin/engine"
     ]

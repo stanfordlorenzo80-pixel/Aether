@@ -124,6 +124,7 @@ missing module named 'botocore.model' - imported by anthropic.lib.bedrock._strea
 missing module named 'google.auth' - imported by anthropic.lib._extras._google_auth (delayed, optional), anthropic.lib.vertex._auth (delayed, conditional, optional), anthropic.lib.vertex._client (conditional)
 missing module named google - imported by anthropic.lib._extras._google_auth (conditional)
 missing module named httpx_aiohttp - imported by anthropic._base_client (optional)
+missing module named pydantic_settings - imported by aether.config (top-level)
 missing module named 'gunicorn.arbiter' - imported by uvicorn.workers (top-level)
 missing module named watchfiles - imported by uvicorn.supervisors.watchfilesreload (top-level)
 missing module named 'wsproto.utilities' - imported by uvicorn.protocols.websockets.wsproto_impl (top-level)

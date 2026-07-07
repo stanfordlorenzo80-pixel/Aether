@@ -98,6 +98,7 @@ imports:
  &#8226;   <a href="#aether.memory.vector_store">aether.memory.vector_store</a>
  &#8226;   <a href="#aether.providers.claude">aether.providers.claude</a>
  &#8226;   <a href="#aether.providers.ollama">aether.providers.ollama</a>
+ &#8226;   <a href="#aether.providers.registry">aether.providers.registry</a>
  &#8226;   <a href="#aether.swarm">aether.swarm</a>
  &#8226;   <a href="#aether.swarm.node">aether.swarm.node</a>
  &#8226;   <a href="#asyncio">asyncio</a>
@@ -956,7 +957,8 @@ imported by:
   <a target="code" href="///C:/Users/Administrator/AppData/Local/Programs/Python/Python312/Lib/__future__.py" type="text/plain"><tt>__future__</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
 imported by:
-    <a href="#anthropic._base_client">anthropic._base_client</a>
+    <a href="#aether.providers.registry">aether.providers.registry</a>
+ &#8226;   <a href="#anthropic._base_client">anthropic._base_client</a>
  &#8226;   <a href="#anthropic._client">anthropic._client</a>
  &#8226;   <a href="#anthropic._compat">anthropic._compat</a>
  &#8226;   <a href="#anthropic._decoders.jsonl">anthropic._decoders.jsonl</a>
@@ -2864,9 +2866,29 @@ imported by:
   <a target="code" href="///C:/Users/Administrator/.gemini/antigravity/scratch/aether/engine/aether/__init__.py" type="text/plain"><tt>aether</tt></a>
 <span class="moduletype">Package</span>  <div class="import">
 imported by:
-    <a href="#aether.memory">aether.memory</a>
+    <a href="#aether.config">aether.config</a>
+ &#8226;   <a href="#aether.memory">aether.memory</a>
  &#8226;   <a href="#aether.providers">aether.providers</a>
  &#8226;   <a href="#aether.swarm">aether.swarm</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="aether.config"></a>
+  <a target="code" href="///C:/Users/Administrator/.gemini/antigravity/scratch/aether/engine/aether/config.py" type="text/plain"><tt>aether.config</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#aether">aether</a>
+ &#8226;   <a href="#pydantic">pydantic</a>
+ &#8226;   <a href="#pydantic_settings">pydantic_settings</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#aether.providers.openrouter">aether.providers.openrouter</a>
+ &#8226;   <a href="#aether.providers.registry">aether.providers.registry</a>
 
   </div>
 
@@ -2925,6 +2947,8 @@ imported by:
     <a href="#aether.providers.base">aether.providers.base</a>
  &#8226;   <a href="#aether.providers.claude">aether.providers.claude</a>
  &#8226;   <a href="#aether.providers.ollama">aether.providers.ollama</a>
+ &#8226;   <a href="#aether.providers.openrouter">aether.providers.openrouter</a>
+ &#8226;   <a href="#aether.providers.registry">aether.providers.registry</a>
 
   </div>
 
@@ -2944,6 +2968,8 @@ imports:
 imported by:
     <a href="#aether.providers.claude">aether.providers.claude</a>
  &#8226;   <a href="#aether.providers.ollama">aether.providers.ollama</a>
+ &#8226;   <a href="#aether.providers.openrouter">aether.providers.openrouter</a>
+ &#8226;   <a href="#aether.providers.registry">aether.providers.registry</a>
 
   </div>
 
@@ -2965,7 +2991,8 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#server.py">server.py</a>
+    <a href="#aether.providers.registry">aether.providers.registry</a>
+ &#8226;   <a href="#server.py">server.py</a>
 
   </div>
 
@@ -2981,6 +3008,53 @@ imports:
  &#8226;   <a href="#httpx">httpx</a>
  &#8226;   <a href="#json">json</a>
  &#8226;   <a href="#time">time</a>
+ &#8226;   <a href="#typing">typing</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#aether.providers.registry">aether.providers.registry</a>
+ &#8226;   <a href="#server.py">server.py</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="aether.providers.openrouter"></a>
+  <a target="code" href="///C:/Users/Administrator/.gemini/antigravity/scratch/aether/engine/aether/providers/openrouter.py" type="text/plain"><tt>aether.providers.openrouter</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#aether.config">aether.config</a>
+ &#8226;   <a href="#aether.providers">aether.providers</a>
+ &#8226;   <a href="#aether.providers.base">aether.providers.base</a>
+ &#8226;   <a href="#aiohttp">aiohttp</a>
+ &#8226;   <a href="#json">json</a>
+ &#8226;   <a href="#os">os</a>
+ &#8226;   <a href="#typing">typing</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#aether.providers.registry">aether.providers.registry</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="aether.providers.registry"></a>
+  <a target="code" href="///C:/Users/Administrator/.gemini/antigravity/scratch/aether/engine/aether/providers/registry.py" type="text/plain"><tt>aether.providers.registry</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#__future__">__future__</a>
+ &#8226;   <a href="#aether.config">aether.config</a>
+ &#8226;   <a href="#aether.providers">aether.providers</a>
+ &#8226;   <a href="#aether.providers.base">aether.providers.base</a>
+ &#8226;   <a href="#aether.providers.claude">aether.providers.claude</a>
+ &#8226;   <a href="#aether.providers.ollama">aether.providers.ollama</a>
+ &#8226;   <a href="#aether.providers.openrouter">aether.providers.openrouter</a>
+ &#8226;   <a href="#logging">logging</a>
  &#8226;   <a href="#typing">typing</a>
 
   </div>
@@ -3178,7 +3252,8 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#aether.swarm.node">aether.swarm.node</a>
+    <a href="#aether.providers.openrouter">aether.providers.openrouter</a>
+ &#8226;   <a href="#aether.swarm.node">aether.swarm.node</a>
  &#8226;   <a href="#aiohttp">aiohttp</a>
  &#8226;   <a href="#aiohttp._cookie_helpers">aiohttp._cookie_helpers</a>
  &#8226;   <a href="#aiohttp._http_parser">aiohttp._http_parser</a>
@@ -44854,6 +44929,7 @@ imports:
 imported by:
     <a href="#aether.memory.vector_store">aether.memory.vector_store</a>
  &#8226;   <a href="#aether.providers.ollama">aether.providers.ollama</a>
+ &#8226;   <a href="#aether.providers.openrouter">aether.providers.openrouter</a>
  &#8226;   <a href="#aiohttp._websocket.models">aiohttp._websocket.models</a>
  &#8226;   <a href="#aiohttp.client">aiohttp.client</a>
  &#8226;   <a href="#aiohttp.cookiejar">aiohttp.cookiejar</a>
@@ -45059,7 +45135,8 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#aiohttp.abc">aiohttp.abc</a>
+    <a href="#aether.providers.registry">aether.providers.registry</a>
+ &#8226;   <a href="#aiohttp.abc">aiohttp.abc</a>
  &#8226;   <a href="#aiohttp.log">aiohttp.log</a>
  &#8226;   <a href="#aiohttp.web">aiohttp.web</a>
  &#8226;   <a href="#aiohttp.web_app">aiohttp.web_app</a>
@@ -46516,6 +46593,7 @@ imported by:
  &#8226;   <a href="#_sitebuiltins">_sitebuiltins</a>
  &#8226;   <a href="#aether.memory.vector_store">aether.memory.vector_store</a>
  &#8226;   <a href="#aether.providers.claude">aether.providers.claude</a>
+ &#8226;   <a href="#aether.providers.openrouter">aether.providers.openrouter</a>
  &#8226;   <a href="#aiohttp.client">aiohttp.client</a>
  &#8226;   <a href="#aiohttp.client_middleware_digest_auth">aiohttp.client_middleware_digest_auth</a>
  &#8226;   <a href="#aiohttp.cookiejar">aiohttp.cookiejar</a>
@@ -47686,7 +47764,8 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#anthropic._base_client">anthropic._base_client</a>
+    <a href="#aether.config">aether.config</a>
+ &#8226;   <a href="#anthropic._base_client">anthropic._base_client</a>
  &#8226;   <a href="#anthropic._compat">anthropic._compat</a>
  &#8226;   <a href="#anthropic._legacy_response">anthropic._legacy_response</a>
  &#8226;   <a href="#anthropic._models">anthropic._models</a>
@@ -51438,6 +51517,17 @@ imported by:
 <span class="moduletype">MissingModule</span>  <div class="import">
 imported by:
     <a href="#fastapi.encoders">fastapi.encoders</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="pydantic_settings"></a>
+  <a target="code" href="" type="text/plain"><tt>pydantic_settings</tt></a>
+<span class="moduletype">MissingModule</span>  <div class="import">
+imported by:
+    <a href="#aether.config">aether.config</a>
 
   </div>
 
@@ -57957,6 +58047,8 @@ imported by:
  &#8226;   <a href="#aether.providers.base">aether.providers.base</a>
  &#8226;   <a href="#aether.providers.claude">aether.providers.claude</a>
  &#8226;   <a href="#aether.providers.ollama">aether.providers.ollama</a>
+ &#8226;   <a href="#aether.providers.openrouter">aether.providers.openrouter</a>
+ &#8226;   <a href="#aether.providers.registry">aether.providers.registry</a>
  &#8226;   <a href="#aether.swarm.node">aether.swarm.node</a>
  &#8226;   <a href="#aiohappyeyeballs._staggered">aiohappyeyeballs._staggered</a>
  &#8226;   <a href="#aiohttp">aiohttp</a>
