@@ -7,13 +7,18 @@ from aether.providers.base import BaseProvider, ModelInfo
 class OllamaProvider(BaseProvider):
     def __init__(self):
         super().__init__("ollama", "Ollama (Local)", "local")
-        self.base_url = "http://localhost:11434"
+        self.base_url = "http://127.0.0.1:11434"
         self.client = httpx.AsyncClient(timeout=5.0)
         
     async def initialize(self):
         try:
-            # Auto-detect models
-            resp = await self.client.get(f"{self.base_url}/api/tags")
+            # Check 127.0.0.1 first
+            resp = await self.client.get(f"{self.base_url}/api/tags", timeout=2.0)
+            if resp.status_code != 200:
+                # Fallback to localhost
+                self.base_url = "http://localhost:11434"
+                resp = await self.client.get(f"{self.base_url}/api/tags", timeout=2.0)
+            
             if resp.status_code == 200:
                 data = resp.json()
                 self.models = [

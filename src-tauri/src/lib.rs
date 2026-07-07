@@ -14,6 +14,9 @@ pub struct EngineState {
     pub connected: bool,
 }
 
+use tauri_plugin_shell::ShellExt;
+use tauri_plugin_shell::process::CommandEvent;
+
 /// Primary entry point for the Tauri application.
 ///
 /// Initialises logging, registers all plugins and command handlers,
@@ -30,6 +33,7 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(Mutex::new(EngineState {
             port: 8420,
             connected: false,
@@ -39,6 +43,20 @@ pub fn run() {
             if let Some(win) = window {
                 info!("Main window created: {:?}", win.title());
             }
+
+            info!("Spawning Python Engine Sidecar...");
+            let sidecar_command = app.shell().sidecar("engine").unwrap();
+            let (mut rx, _child) = sidecar_command.spawn().expect("Failed to spawn sidecar");
+
+            tauri::async_runtime::spawn(async move {
+                while let Some(event) = rx.recv().await {
+                    match event {
+                        CommandEvent::Stdout(line) => info!("Engine: {}", String::from_utf8_lossy(&line)),
+                        CommandEvent::Stderr(line) => info!("Engine Err: {}", String::from_utf8_lossy(&line)),
+                        _ => {}
+                    }
+                }
+            });
 
             info!("Aether setup complete — engine expected on port 8420");
             Ok(())

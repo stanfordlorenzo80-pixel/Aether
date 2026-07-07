@@ -29,6 +29,17 @@
     }
   },
   "bundle": {
-    "active": true
+    "active": true,
+    "externalBin": [
+      "bin/engine"
+    ]
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://raw.githubusercontent.com/stanfordlorenzo80-pixel/Aether/main/updater.json"
+      ],
+      "pubkey": "dGVzdF9wdWJsaWNfa2V5X3JlcGxhY2VfbWVfbGF0ZXI="
+    }
   }
 }
