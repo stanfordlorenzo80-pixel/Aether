@@ -46,3 +46,8 @@ class ModelRegistry:
         
         async for chunk in self.providers[provider_id].stream_chat(model_id, messages):
             yield chunk
+
+    async def chat(self, provider_id: str, model_id: str, messages: List[dict]) -> str:
+        if provider_id not in self.providers:
+            raise ValueError(f"Provider {provider_id} not found")
+        return await self.providers[provider_id].chat(model_id, messages)

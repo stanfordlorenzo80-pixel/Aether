@@ -64,3 +64,18 @@ class OllamaProvider(BaseProvider):
                         yield data["message"]["content"]
                 except json.JSONDecodeError:
                     continue
+
+    async def chat(self, model_id: str, messages: List[dict]) -> str:
+        url = f"{self.base_url}/api/chat"
+        payload = {
+            "model": model_id,
+            "messages": messages,
+            "stream": False
+        }
+        
+        resp = await self.client.post(url, json=payload, timeout=None)
+        if resp.status_code != 200:
+            raise ValueError(f"Ollama error: {resp.text}")
+        
+        data = resp.json()
+        return data["message"]["content"]

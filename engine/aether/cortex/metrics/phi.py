@@ -1,34 +1,40 @@
-import math
 from typing import Dict, Any, List
+import json
 
-def calculate_phi(graph_state: Dict[str, Any], active_pathways: List[Dict[str, Any]]) -> float:
-    """
-    Calculates a heuristic approximation of Integrated Information (Φ).
-    In IIT, Φ measures how much the system is 'more than the sum of its parts'.
-    For our computation graph, it measures the interdependency of reasoning nodes.
-    
-    Args:
-        graph_state: State of nodes in the graph
-        active_pathways: Connections between nodes with their weights
+class PhiCalculator:
+    def __init__(self, registry):
+        self.registry = registry
+        self.SYSTEM_PROMPT = \"\"\"You are the Aether Information Integration Evaluator.
+Given the reasoning graph state and the outputs of the nodes, calculate a Causal Coherence Score (Phi).
+Measure how deeply interconnected and mutually dependent the node outputs are.
+Output pure JSON:
+{"phi_score": float, "analysis": "short explanation"}
+Do not use markdown blocks.\"\"\"
+
+    async def calculate_phi(self, graph_state: Dict[str, Any], active_pathways: List[Dict[str, Any]], outputs: Dict[str, Any]) -> float:
+        if not active_pathways:
+            return 0.0
+            
+        user_prompt = f"Graph: {json.dumps(graph_state)}\nPathways: {json.dumps(active_pathways)}\nOutputs: {json.dumps(outputs)}"
         
-    Returns:
-        float: Φ score (0.0 to 1.0) representing coherence/integration
-    """
-    if not active_pathways:
-        return 0.0
-        
-    # Heuristic: highly interconnected nodes with strong bidirectional 
-    # weights yield higher Φ. Isolated components reduce Φ.
-    
-    total_weight = sum(p.get("weight", 0) for p in active_pathways)
-    num_nodes = len(graph_state.get("nodes", []))
-    
-    if num_nodes <= 1:
-        return 0.0
-        
-    # Simulated calculation for the framework foundation
-    integration = total_weight / (num_nodes * (num_nodes - 1))
-    
-    # Sigmoid normalization to 0-1
-    phi = 1 / (1 + math.exp(-10 * (integration - 0.5)))
-    return round(phi, 4)
+        try:
+            p_info = self.registry.get_all_providers_info()
+            if not p_info or not p_info[0]["models"]: return 0.0
+            
+            pid = p_info[0]["id"]
+            mid = p_info[0]["models"][0]["id"]
+            if pid == "claude": mid = "claude-3-haiku-20240307"
+                
+            raw_response = await self.registry.chat(pid, mid, [
+                {"role": "system", "content": self.SYSTEM_PROMPT},
+                {"role": "user", "content": user_prompt}
+            ])
+            
+            cleaned = raw_response.strip()
+            if cleaned.startswith("```json"): cleaned = cleaned[7:]
+            if cleaned.endswith("```"): cleaned = cleaned[:-3]
+            
+            evaluation = json.loads(cleaned.strip())
+            return float(evaluation.get("phi_score", 0.0))
+        except Exception:
+            return 0.0

@@ -30,6 +30,11 @@ class BaseProvider(ABC):
     async def stream_chat(self, model_id: str, messages: List[dict]) -> AsyncGenerator[str, None]:
         pass
         
+    @abstractmethod
+    async def chat(self, model_id: str, messages: List[dict]) -> str:
+        """Non-streaming chat for internal framework routing and meta-cognition"""
+        pass
+        
     def get_info(self) -> dict:
         return {
             "id": self.id,

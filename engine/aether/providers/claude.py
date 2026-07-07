@@ -71,3 +71,14 @@ class ClaudeProvider(BaseProvider):
         ) as stream:
             async for text in stream.text_stream:
                 yield text
+
+    async def chat(self, model_id: str, messages: List[dict]) -> str:
+        if not self.client:
+            raise ValueError("Anthropic client not configured")
+            
+        response = await self.client.messages.create(
+            max_tokens=4096,
+            messages=messages,
+            model=model_id
+        )
+        return response.content[0].text

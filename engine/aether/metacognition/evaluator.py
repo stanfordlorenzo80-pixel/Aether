@@ -1,25 +1,46 @@
 from typing import Dict, Any
+import json
 
 class PerformanceEvaluator:
     """
     Performance self-assessment against task objectives.
-    Determines how well a specific reasoning pathway actually answered the user's query.
+    Uses an LLM-as-a-Judge pipeline to determine how well a reasoning pathway answered the query.
     """
+    def __init__(self, registry):
+        self.registry = registry
+        self.SYSTEM_PROMPT = \"\"\"You are the Aether Performance Evaluator.
+Analyze the user query and the system's reasoning output. Score the output on a scale of 0.0 to 1.0 based on:
+1. Accuracy and Relevance
+2. Depth of Reasoning
+3. Logical Coherence
+Output pure JSON:
+{"score": float, "critique": "short explanation"}
+Do not use markdown blocks.\"\"\"
     
-    def evaluate(self, query: str, output: Dict[str, Any]) -> float:
-        """
-        Returns a score between 0.0 and 1.0 indicating response quality.
-        In a full implementation, this uses an LLM-as-a-judge prompt.
-        """
-        # Heuristic scoring for foundation
-        score = 0.5
+    async def evaluate(self, query: str, output: Dict[str, Any]) -> float:
+        user_prompt = f"Query: {query}\nOutput: {json.dumps(output)}\n"
         
-        # If output contains rich structure, score higher
-        if "analytical_insight" in output and "creative_insight" in output:
-            score += 0.3
+        try:
+            # Fallback to claude-haiku if available, else first model
+            p_info = self.registry.get_all_providers_info()
+            if not p_info or not p_info[0]["models"]:
+                return 0.5
             
-        # If confidence is explicitly stated and high
-        if output.get("confidence", 0) > 0.8:
-            score += 0.1
+            pid = p_info[0]["id"]
+            mid = p_info[0]["models"][0]["id"]
+            if pid == "claude":
+                mid = "claude-3-haiku-20240307"
+                
+            raw_response = await self.registry.chat(pid, mid, [
+                {"role": "system", "content": self.SYSTEM_PROMPT},
+                {"role": "user", "content": user_prompt}
+            ])
             
-        return min(1.0, score)
+            cleaned = raw_response.strip()
+            if cleaned.startswith("```json"): cleaned = cleaned[7:]
+            if cleaned.endswith("```"): cleaned = cleaned[:-3]
+            
+            evaluation = json.loads(cleaned.strip())
+            return float(evaluation.get("score", 0.5))
+        except Exception:
+            return 0.5
