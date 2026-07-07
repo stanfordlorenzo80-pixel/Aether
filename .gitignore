@@ -1,0 +1,19 @@
+# Node
+node_modules/
+dist/
+
+# Python
+engine/venv/
+engine/__pycache__/
+engine/**/*.pyc
+.env
+aether_memory.json
+
+# Rust / Tauri
+src-tauri/target/
+src-tauri/gen/
+**/*.rs.bk
+
+# OS
+.DS_Store
+Thumbs.db

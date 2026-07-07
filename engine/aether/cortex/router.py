@@ -19,17 +19,18 @@ class AdaptiveRouter:
         self.graph.add_node(self.analytical)
         self.graph.add_node(self.creative)
         
-    async def route_task(self, query: str) -> Dict[str, Any]:
+    async def route_task(self, query: str, memory_context: str = "") -> Dict[str, Any]:
         """
         Determine the best execution pathway for a given query using LLM classification.
         """
-        system_prompt = \"\"\"You are the Aether Routing mechanism.
+        system_prompt = f\"\"\"You are the Aether Routing mechanism.
 Analyze the user's query and decide which cognitive nodes should process it.
+Relevant Past Memories: {memory_context}
 Respond in pure JSON format:
-{
+{{
   "needs_analytical": boolean, // True if the query requires logic, coding, math, or step-by-step breakdown
   "needs_creative": boolean // True if the query requires brainstorming, lateral thinking, or narrative
-}
+}}
 Do not wrap in markdown.\"\"\"
 
         try:
