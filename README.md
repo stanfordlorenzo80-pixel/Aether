@@ -1,6 +1,6 @@
 <div align="center">
   <h1>🌌 Aether</h1>
-  <p><strong>The Next Step in AI Evolution: A Dynamic, Self-Improving Cognitive Architecture</strong></p>
+  <p><strong>A Next-Generation, Distributed Cognitive Architecture & P2P AI Engine</strong></p>
 
   <p>
     <img src="https://img.shields.io/badge/version-v0.1.0-blue.svg?style=for-the-badge" alt="Version">
@@ -11,88 +11,40 @@
 
 ---
 
-Aether is a premium, open-source AI desktop application and framework that advances the capabilities of frontier models (Claude, Ollama, OpenAI) by wrapping them in a **dynamic reasoning graph** and an **autonomous self-improvement loop**. 
+## What is Aether?
 
-It’s designed to be the closest thing to AGI you can run locally, combining a stunning Apple-grade desktop UI (built with Tauri and React) with a cutting-edge Python cognitive engine.
+Aether is not just another LLM wrapper—it is a full-stack, distributed **Cognitive Architecture**. Built on a native Rust/Tauri desktop shell with a standalone Python engine, Aether dynamically routes reasoning tasks across cloud providers (Claude, OpenAI) and local hardware (Ollama), stores long-term memory in a local vector database, and uses a P2P Swarm network to distribute compute across multiple machines.
 
-## 🧠 Core Architecture
+## ⚡ Key Features
 
-Aether abandons static prompt chains in favor of a fluid, neuroplasticity-inspired architecture. 
+* **Neuroplastic Routing Graph**: Automatically analyzes prompts and routes them to the optimal LLM based on task complexity, context length, and required capabilities.
+* **Long-Term Vector Memory**: Aether automatically persists conversation history into a local TF-IDF vector store and injects relevant context into future prompts organically.
+* **P2P Swarm Mesh**: Connect multiple Aether nodes across a network via WebSockets to distribute heavy reasoning tasks and establish an autonomous multi-agent swarm.
+* **Zero-Friction Standalone EXE**: The entire Python cognitive engine is frozen via PyInstaller into a hidden "Sidecar". When you run `Aether.exe`, everything boots up seamlessly. No terminal windows required.
+* **OTA Auto-Updates**: Built-in Rust-native auto-updater. When a new release drops on GitHub, Aether downloads and installs it directly within the app.
 
-### 1. The Cortex (Dynamic Reasoning DAG)
-Instead of feeding your prompt blindly to an LLM, the **Adaptive Router** (powered by a fast classification LLM) analyzes the intent and constructs a directed acyclic graph (DAG) of reasoning pathways in real-time.
-- **Analytical Node**: Demands strict, formal logic and step-by-step breakdowns.
-- **Creative Node**: Injects divergent thinking and lateral associations.
-*Pathways strengthen or prune themselves based on historical success.*
+## 🚀 Installation (One-Click Launch)
 
-### 2. Meta-Cognition (LLM-as-a-Judge)
-Aether watches itself think. 
-- **Performance Evaluator**: Scores output based on accuracy, depth, and logical coherence.
-- **Phi Calculator**: Approximates Integrated Information Theory (IIT) by calculating the causal coherence and interdependency of the reasoning graph's nodes.
+Aether is compiled as a standalone `.exe` for Windows. There are no Python virtual environments to set up and no dependencies to install. 
 
-### 3. Evolution (DSPy-Style Programmatic Optimization)
-Aether is capable of autonomous self-improvement. When the Meta-Cognitive layer detects an anomaly or a low-scoring reasoning trace, the **Mutation Engine** rewrites its own internal system prompts, benchmarks the variants locally, and permanently adopts the highest-performing neural weights.
+1. Head to the [Releases](#) tab and download the latest `Aether.msi` or `Aether.exe`.
+2. Double-click the installer.
+3. Open the app and drop your Anthropic API Key or hook up your local Ollama instance in the **Settings** menu.
 
----
+## 🔌 Headless Plugin / API Mode
 
-## 💻 The Desktop Experience
+Because Aether's core runs as a local FastAPI sidecar on port `8420`, the entire cognitive architecture can be leveraged as a plugin. 
 
-Aether isn’t just a terminal tool. It ships with a beautiful, dark-mode-first desktop shell built on Tauri 2.x.
-- **Calm Power Design**: Fluid Framer Motion animations, deeply tailored color palettes, and micro-interactions.
-- **Seamless Provider Connectivity**: Built-in support for Anthropic Claude (Primary) and zero-config auto-detection for local Ollama models.
-- **Real-Time Streaming**: Server-Sent Events (SSE) ensure zero-latency token streaming from the Python engine to the React frontend.
+Any local script, Chrome Extension, or IDE plugin can send an HTTP or WebSocket request to `http://127.0.0.1:8420/api/chat` to harness Aether's swarm and memory graph completely headless.
 
----
+## 🛠️ Architecture Stack
 
-## 🚀 Quick Start
+- **Desktop Shell**: Tauri 2.0 (Rust)
+- **Frontend**: React, Vite, Tailwind CSS, Framer Motion
+- **Cognitive Engine**: Python 3.11, FastAPI, DSPy
+- **Memory Store**: Local Vector Embeddings (TF-IDF/Cosine Similarity)
+- **Networking**: `aiohttp` WebSocket Mesh
 
-> **Aether is designed for zero-friction deployment.** We've eliminated complex manual setups. Our intelligent bootloader safely isolates the Python cognitive engine into a virtual environment and seamlessly hooks it into the Tauri desktop shell.
+## 📜 License
 
-### Prerequisites
-- [Node.js](https://nodejs.org/) (v18+)
-- [Rust](https://rustup.rs/)
-- [Python 3.10+](https://www.python.org/)
-
-### ⚡ The One-Click Launch
-
-We've bundled an automated launch script that handles **everything**—dependency resolution, virtual environment creation, background process orchestration, and IPC binding.
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/stanfordlorenzo80-pixel/Aether.git
-   cd Aether
-   ```
-
-2. **Add your API Key (Optional but recommended):**
-   *(If you prefer local models, Aether will auto-detect Ollama running on your machine).*
-   - **Windows:** `set ANTHROPIC_API_KEY=your-api-key-here`
-   - **Mac/Linux:** `export ANTHROPIC_API_KEY="your-api-key-here"`
-
-3. **Ignite Aether:**
-   - **Windows:** Double-click `start.bat` (or run `.\start.bat` in terminal)
-   - **Mac/Linux:** Run `./start.sh`
-
-*That's it. The script will boot the Cortex engine, compile the UI, and launch the stunning desktop application automatically. When you close the app, the background engine shuts itself down cleanly.*
-
----
-
-## 🗺️ Roadmap
-- [x] **Phase 1**: Tauri Desktop Shell & Python Engine Foundation
-- [x] **Phase 2**: Cortex Graph & Dynamic LLM Routing
-- [x] **Phase 3**: Meta-Cognitive Evaluator & Coherence Scoring
-- [x] **Phase 4**: Evolutionary Self-Improvement Loop & Mutations
-- [ ] **Phase 5**: Multi-modal memory embeddings & local vector store
-- [ ] **Phase 6**: Distributed reasoning swarms across network peers
-
----
-
-## 🤝 Contributing
-Aether is an open-source initiative pushing the boundaries of autonomous cognitive architectures. We welcome PRs for new Reasoning Nodes, advanced Meta-Cognitive metrics, and UI refinements. 
-
-Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting a pull request.
-
----
-
-<div align="center">
-  <i>Think beyond.</i>
-</div>
+This project is open-source and licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
