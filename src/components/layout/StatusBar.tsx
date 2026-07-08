@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { APP_VERSION } from '@/lib/constants';
+import { useModelStore } from '@/lib/store';
 
 export interface StatusBarProps {
   connected: boolean;
@@ -8,6 +9,8 @@ export interface StatusBarProps {
 }
 
 export function StatusBar({ connected, latency }: StatusBarProps) {
+  const activeModel = useModelStore(state => state.activeModel);
+
   return (
     <footer className="flex h-7 shrink-0 items-center justify-between px-3 border-t border-aether-border bg-aether-surface-0 text-[11px] text-aether-text-tertiary z-20 select-none">
       <div className="flex items-center gap-3">
@@ -18,7 +21,7 @@ export function StatusBar({ connected, latency }: StatusBarProps) {
         
         <div className="w-[1px] h-3 bg-aether-border" />
         
-        <span>Model: claude-3-5-sonnet-20240620</span>
+        <span>Model: {activeModel}</span>
       </div>
 
       <div className="flex items-center gap-3">

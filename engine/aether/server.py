@@ -211,7 +211,7 @@ async def chat_completions(request: Request):
             if custom_prompt:
                 sys_msg = next((m for m in messages if m["role"] == "system"), None)
                 if sys_msg:
-                    sys_msg["content"] = custom_prompt + "\\n\\n" + sys_msg["content"]
+                    sys_msg["content"] = custom_prompt + "\n\n" + sys_msg["content"]
                 else:
                     messages.insert(0, {"role": "system", "content": custom_prompt})
 

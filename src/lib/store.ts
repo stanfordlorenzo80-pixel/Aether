@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { persist } from 'zustand/middleware';
 import type { Conversation, Message, ProviderInfo, EngineStatus, ViewId } from './types';
 
 // Chat Store
@@ -16,10 +17,11 @@ interface ChatState {
 }
 
 export const useChatStore = create<ChatState>()(
-  immer((set, get) => ({
-    conversations: [],
-    activeConversationId: null,
-    isStreaming: false,
+  persist(
+    immer((set, get) => ({
+      conversations: [],
+      activeConversationId: null,
+      isStreaming: false,
     
     createConversation: (model) => {
       const id = crypto.randomUUID();
@@ -84,7 +86,15 @@ export const useChatStore = create<ChatState>()(
       const { conversations, activeConversationId } = get();
       return conversations.find((c) => c.id === activeConversationId);
     },
-  }))
+  })),
+  {
+    name: 'aether-chat-storage',
+    partialize: (state) => ({ 
+      conversations: state.conversations, 
+      activeConversationId: state.activeConversationId 
+    }),
+  }
+)
 );
 
 // Model Store
@@ -99,11 +109,12 @@ interface ModelState {
 }
 
 export const useModelStore = create<ModelState>()(
-  immer((set) => ({
-    providers: [],
-    activeProvider: 'claude',
-    activeModel: 'claude-3-5-sonnet-20240620',
-    isConnected: false,
+  persist(
+    immer((set) => ({
+      providers: [],
+      activeProvider: 'claude',
+      activeModel: 'claude-3-5-sonnet-20240620',
+      isConnected: false,
     
     setProviders: (providers) => {
       set((state) => {
@@ -123,7 +134,15 @@ export const useModelStore = create<ModelState>()(
         state.isConnected = isConnected;
       });
     },
-  }))
+  })),
+  {
+    name: 'aether-model-storage',
+    partialize: (state) => ({ 
+      activeProvider: state.activeProvider, 
+      activeModel: state.activeModel 
+    }),
+  }
+)
 );
 
 // UI Store
