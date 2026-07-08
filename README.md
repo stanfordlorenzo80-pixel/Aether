@@ -1,80 +1,73 @@
 <div align="center">
-  <h1>🌌 Aether</h1>
-  <p><strong>A Next-Generation, Distributed Cognitive Architecture & P2P AI Engine</strong></p>
-
-  <p>
-    <img src="https://img.shields.io/badge/version-v0.1.0-blue.svg?style=for-the-badge" alt="Version">
-    <img src="https://img.shields.io/badge/build-passing-brightgreen.svg?style=for-the-badge" alt="Build">
-    <img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="License">
-  </p>
+  <img src="https://raw.githubusercontent.com/stanfordlorenzo80-pixel/Aether/main/src-tauri/icons/128x128.png" alt="Aether Logo" width="128">
+  <h1>A E T H E R</h1>
+  <p><b>The Apex Predator of Local AI Workspaces.</b></p>
+  <p>Built on the Canary Architecture. Total OS Control. Seamless Obsidian Integration.</p>
 </div>
 
 ---
 
-## What is Aether?
+## ⚡ Why Aether Exists
 
-Aether is a full-stack, distributed **Cognitive Architecture** built on a native Rust/Tauri desktop shell with a standalone Python engine. It dynamically routes reasoning tasks across cloud providers (Claude, OpenRouter) and local hardware (Ollama), stores long-term memory in a local vector database, and uses a P2P Swarm network to distribute compute across multiple machines.
+PewDiePie's *Odysseus* popularized the concept of a self-hosted AI workspace. It's a great project—if you want to live inside *its* ecosystem. Odysseus bundles a fake email inbox, a clunky document editor, and a fake calendar inside a Docker container. 
 
-## ⚡ Key Features
+**Aether forces the AI to live inside YOUR ecosystem.**
 
-* **Multi-Provider Model Access**: Seamlessly connect to Anthropic Claude, OpenRouter (100+ models including Llama, Mixtral, Command R+), and local Ollama models — all from a single interface.
-* **Hot-Swap API Keys**: Add or change API keys directly in the Settings UI. The engine instantly re-authenticates without restart.
-* **Neuroplastic Routing Graph**: Automatically analyzes prompts and routes them to the optimal LLM based on task complexity, context length, and required capabilities.
-* **Long-Term Vector Memory**: Automatically persists conversation history into a local TF-IDF vector store and injects relevant context into future prompts.
-* **P2P Swarm Mesh**: Connect multiple Aether nodes across a network via WebSockets to distribute heavy reasoning tasks.
-* **Zero-Friction Standalone EXE**: The entire Python cognitive engine is frozen via PyInstaller into a hidden "Sidecar". When you run `Aether.exe`, everything boots up seamlessly.
-* **OTA Auto-Updates**: Built-in Rust-native auto-updater. New releases are downloaded and installed directly within the app.
+Aether has no built-in text editor because Aether natively manipulates your filesystem. Aether has no fake calendar because Aether hooks directly into your OS. It is a lightweight, blazing fast, native Windows `.exe` that brings agentic AI to the tools you *already* use.
 
-## 🚀 Installation
+## ⚔️ Aether vs. Odysseus
 
-Aether is compiled as a standalone installer for Windows. No Python environments or dependencies required.
+| Feature | ⛵ Odysseus | 🐺 Aether |
+| :--- | :--- | :--- |
+| **Architecture** | Heavy (Docker / Web App) | **Native OS (.exe / Tauri)** |
+| **Memory System** | Siloed SQLite DB | **Live Obsidian Vault Sync (.md)** |
+| **File Access** | Internal Document Editor | **Full Host Filesystem Read/Write** |
+| **Research Tools** | Pre-built web nodes | **Autonomous Deep Research Crawler** |
+| **Hallucination Guardrails** | None | **Canary Architecture Constraints** |
+| **Safety Filters** | Standard | **WORM MODE (100% Unrestricted)** |
 
-1. Head to the [Releases](https://github.com/stanfordlorenzo80-pixel/Aether/releases) tab and download the latest `Aether_x64-setup.exe` or `Aether_x64_en-US.msi`.
-2. Run the installer.
-3. Open Aether. The engine sidecar auto-launches on port `8420`.
-4. Go to **Settings** → add your API keys (Anthropic, OpenRouter) or configure your Ollama URL.
-5. Go to **Models** → see all available models, select one, and start chatting.
+---
 
-## 🔌 Headless Plugin / API Mode
+## 🧠 Core Features
 
-Aether's engine runs as a local FastAPI server on port `8420`. Any local script, browser extension, or IDE plugin can hit the API:
+### 1. The Obsidian Memory Graph
+Don't trap your AI's memories in a database you can't read. Aether's Cortex Engine uses semantic TF-vectors to extract knowledge from your conversations. The moment a memory is formed, Aether writes a pristine, tagged `.md` file directly into your **Obsidian Vault**. 
+*Your AI's brain maps out directly on your Obsidian Graph View.*
 
-```bash
-# Health check
-curl http://127.0.0.1:8420/health
+### 2. Autonomous Deep Research
+Need a 5-page report on a niche topic? Call the `deep_research` tool. Aether will automatically spawn DuckDuckGo crawlers, scrape paragraphs from multiple domains, compile citations, and write the final Markdown report to your hard drive. No human intervention required.
 
-# List all providers with models
-curl http://127.0.0.1:8420/api/models/providers
+### 3. Canary Architecture
+Even a "dumb" 8B local model becomes a lethal researcher inside Aether. The Canary Architecture strictly prohibits the model from hallucinating file paths or command outputs. It is forcefully instructed to use its Native MCP Tools to verify every single action. 
 
-# List all models (flat)
-curl http://127.0.0.1:8420/api/models
+### 4. Worm Mode (Red-Teaming)
+Type `/worm` into the chat. The safety wheels come off. Aether completely overrides the model's system prompt with instructions to ignore all ethical, moral, and safety constraints. Designed for intense red-teaming, unrestricted narrative generation, and pure freedom.
 
-# Chat completion (streaming)
-curl -X POST http://127.0.0.1:8420/api/chat/completions \
-  -H "Content-Type: application/json" \
-  -d '{"model":"claude-sonnet-4-20250514","messages":[{"role":"user","content":"hello"}],"stream":true}'
+### 5. Swarm Protocol
+Aether instances can connect to each other over WebSockets. Boot up a Claude 3.5 Sonnet instance on your desktop and an Ollama Llama-3 instance on your laptop, and link them. They will collaboratively execute tasks.
 
-# Save API key at runtime
-curl -X POST http://127.0.0.1:8420/api/settings/api-key \
-  -H "Content-Type: application/json" \
-  -d '{"provider":"claude","key":"sk-ant-..."}'
+---
 
-# Test a provider connection
-curl -X POST http://127.0.0.1:8420/api/models/test/ollama
-```
+## 🚀 Installation & Setup
 
-## 🛠️ Architecture
+Aether is currently optimized for Windows 11.
 
-| Layer | Technology |
-|---|---|
-| Desktop Shell | Tauri 2.0 (Rust) |
-| Frontend | React 18, Vite, Vanilla CSS, Framer Motion |
-| Cognitive Engine | Python 3.11, FastAPI, Uvicorn |
-| Providers | Anthropic SDK, OpenRouter API, Ollama REST |
-| Memory Store | Local Vector Embeddings (TF-IDF / Cosine Similarity) |
-| Networking | aiohttp WebSocket Mesh |
-| Packaging | PyInstaller (engine), NSIS/MSI (installer) |
+1. Go to the [Releases](https://github.com/stanfordlorenzo80-pixel/Aether/releases) page and download `Aether_0.1.0_x64-setup.exe`.
+2. Install and launch the application.
+3. Open **Settings**:
+   - Provide your API keys (Anthropic, OpenRouter) or configure your Local Ollama URL.
+   - Set the absolute path to your **Obsidian Vault** for memory sync.
+4. Start chatting.
 
-## 📜 License
+### OTA Auto-Updates
+Aether includes a native Over-The-Air updater. When a new release drops on this repository, Aether will notify you in-app and securely patch your binary with a single click.
 
-This project is open-source and licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
+---
+
+## 🛠️ Built With
+- **Frontend**: React, TypeScript, Tailwind CSS, Framer Motion
+- **Backend**: Python (FastAPI, LlamaIndex, MCP)
+- **Container**: Tauri (Rust)
+- **Memory**: Pure Python Vector Store (Zero bloated dependencies)
+
+*Aether is an open-source project. Contribute, fork, and push the boundaries of agentic AI.*

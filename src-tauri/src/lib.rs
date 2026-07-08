@@ -47,7 +47,8 @@ pub fn run() {
 
             info!("Spawning Python Engine Sidecar...");
             let sidecar_command = app.shell().sidecar("engine").unwrap();
-            let (mut rx, _child) = sidecar_command.spawn().expect("Failed to spawn sidecar");
+            let (mut rx, child) = sidecar_command.spawn().expect("Failed to spawn sidecar");
+            app.manage(Mutex::new(Some(child)));
 
             tauri::async_runtime::spawn(async move {
                 while let Some(event) = rx.recv().await {
@@ -70,6 +71,19 @@ pub fn run() {
             commands::settings::get_settings,
             commands::settings::save_settings,
         ])
-        .run(tauri::generate_context!())
-        .expect("fatal: failed to start Aether");
+        .build(tauri::generate_context!())
+        .expect("fatal: failed to build Aether")
+        .run(|app_handle, event| match event {
+            tauri::RunEvent::Exit => {
+                if let Some(child_state) = app_handle.try_state::<Mutex<Option<tauri_plugin_shell::process::CommandChild>>>() {
+                    if let Ok(mut child_opt) = child_state.lock() {
+                        if let Some(child) = child_opt.take() {
+                            let _ = child.kill();
+                            info!("Killed Python sidecar process.");
+                        }
+                    }
+                }
+            }
+            _ => {}
+        });
 }

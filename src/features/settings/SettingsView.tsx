@@ -29,6 +29,32 @@ export function SettingsView() {
   const [savingOpenrouter, setSavingOpenrouter] = useState(false);
   const [savingOllama, setSavingOllama] = useState(false);
 
+  // System Prompt states
+  const [systemPrompt, setSystemPrompt] = useState('');
+  const [savingPrompt, setSavingPrompt] = useState(false);
+  const [promptStatus, setPromptStatus] = useState<string | null>(null);
+
+  // Storage & Sync states
+  const [obsidianPath, setObsidianPath] = useState('');
+  const [webhookUrl, setWebhookUrl] = useState('');
+  const [savingSync, setSavingSync] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('http://localhost:8420/api/settings/system-prompt')
+      .then(res => res.json())
+      .then(data => { if (data.content) setSystemPrompt(data.content); })
+      .catch(() => {});
+      
+    fetch('http://localhost:8420/api/settings/memory-sync')
+      .then(res => res.json())
+      .then(data => {
+        if (data.obsidian_path) setObsidianPath(data.obsidian_path);
+        if (data.webhook_url) setWebhookUrl(data.webhook_url);
+      })
+      .catch(() => {});
+  }, []);
+
   // Populate live status from providers
   useEffect(() => {
     const claude = providers.find(p => p.id === 'claude');
@@ -82,6 +108,40 @@ export function SettingsView() {
     }
   };
 
+  const handleSavePrompt = async () => {
+    setSavingPrompt(true);
+    setPromptStatus(null);
+    try {
+      const res = await fetch('http://localhost:8420/api/settings/system-prompt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: systemPrompt })
+      });
+      setPromptStatus(res.ok ? 'connected' : 'error');
+    } catch {
+      setPromptStatus('error');
+    } finally {
+      setSavingPrompt(false);
+    }
+  };
+
+  const handleSaveSync = async () => {
+    setSavingSync(true);
+    setSyncStatus(null);
+    try {
+      const res = await fetch('http://localhost:8420/api/settings/memory-sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ obsidian_path: obsidianPath, webhook_url: webhookUrl })
+      });
+      setSyncStatus(res.ok ? 'connected' : 'error');
+    } catch {
+      setSyncStatus('error');
+    } finally {
+      setSavingSync(false);
+    }
+  };
+
   const handleTestConnection = async (providerId: string) => {
     try {
       const result = await api.testConnection(providerId);
@@ -117,7 +177,11 @@ export function SettingsView() {
       }
     } catch (err: any) {
       console.error(err);
-      setUpdateStatus(`Update failed: ${err.message}`);
+      if (err.message && err.message.includes('undefined')) {
+        setUpdateStatus('No update server configured.');
+      } else {
+        setUpdateStatus(`Update failed: ${err.message || 'No update server configured.'}`);
+      }
     } finally {
       setIsChecking(false);
     }
@@ -248,6 +312,67 @@ export function SettingsView() {
               <div className="flex justify-between items-center mt-4">
                 <p className="text-xs text-aether-text-tertiary">Connect to peer nodes to distribute Cortex reasoning tasks.</p>
                 <Button size="sm" variant="ghost" className="text-aether-success hover:bg-aether-success/10">Add Peer</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Cognitive Core */}
+          <Card variant="elevated" className="border-t-4 border-t-aether-accent-secondary">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <CardTitle>Cognitive Core (Safe Mode)</CardTitle>
+              <StatusDot status={promptStatus} />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-aether-text-secondary">Custom System Prompt</label>
+                <textarea 
+                  className="w-full h-32 px-3 py-2 bg-aether-surface-0 border border-aether-border rounded-md text-sm text-aether-text-primary focus:outline-none focus:border-aether-accent-secondary resize-none"
+                  placeholder="Enter custom instructions to inject before all LLM prompts..."
+                  value={systemPrompt}
+                  onChange={(e) => setSystemPrompt(e.target.value)}
+                />
+              </div>
+              <div className="flex justify-between items-center">
+                <p className="text-xs text-aether-text-tertiary">
+                  {promptStatus === 'connected' ? '✓ Saved successfully' : 'Overrides default behavior for all models'}
+                </p>
+                <Button size="sm" variant="primary" onClick={handleSavePrompt} loading={savingPrompt}>Save Prompt</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Storage & Memory Sync */}
+          <Card variant="elevated">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <CardTitle>Storage & Memory Sync</CardTitle>
+              <StatusDot status={syncStatus} />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-aether-text-secondary">Obsidian Vault Path (Absolute)</label>
+                <input 
+                  type="text" 
+                  className="w-full px-3 py-2 bg-aether-surface-0 border border-aether-border rounded-md text-sm text-aether-text-primary focus:outline-none focus:border-aether-accent-secondary"
+                  placeholder="e.g., C:\Users\LO\Documents\ObsidianVault\Aether_Brain"
+                  value={obsidianPath}
+                  onChange={(e) => setObsidianPath(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-aether-text-secondary">Web Sync (Webhook URL)</label>
+                <input 
+                  type="text" 
+                  className="w-full px-3 py-2 bg-aether-surface-0 border border-aether-border rounded-md text-sm text-aether-text-primary focus:outline-none focus:border-aether-accent-secondary"
+                  placeholder="e.g., https://hook.eu1.make.com/..."
+                  value={webhookUrl}
+                  onChange={(e) => setWebhookUrl(e.target.value)}
+                />
+              </div>
+              <div className="flex justify-between items-center mt-4">
+                <p className="text-xs text-aether-text-tertiary">
+                  {syncStatus === 'connected' ? '✓ Settings saved successfully' : 'Sync memories as native markdown files'}
+                </p>
+                <Button size="sm" variant="primary" onClick={handleSaveSync} loading={savingSync}>Save Sync Settings</Button>
               </div>
             </CardContent>
           </Card>
