@@ -2,6 +2,7 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { Select } from '@/components/ui/Select';
 import { motion } from 'framer-motion';
+import { useModels } from '@/lib/hooks';
 
 export interface HeaderProps {
   title: string;
@@ -9,11 +10,25 @@ export interface HeaderProps {
 }
 
 export function Header({ title, connected }: HeaderProps) {
-  // Hardcoded for now, will connect to useModelStore in full implementation
-  const mockOptions = [
-    { value: 'claude', label: 'Claude 3.5 Sonnet' },
-    { value: 'ollama', label: 'llama3.1 (Local)' }
-  ];
+  const { models, activeModel, setActiveModel } = useModels();
+
+  // Build options from real model data
+  const modelOptions = models.map(m => ({
+    value: m.id,
+    label: `${m.name}${m.providerInfo?.type === 'local' ? ' (Local)' : ''}`,
+  }));
+
+  // Fallback if no models loaded yet
+  if (modelOptions.length === 0) {
+    modelOptions.push({ value: 'loading', label: 'Loading models...' });
+  }
+
+  const handleModelChange = (value: string) => {
+    const selectedModel = models.find(m => m.id === value);
+    if (selectedModel) {
+      setActiveModel(selectedModel.provider, selectedModel.id);
+    }
+  };
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between px-6 border-b border-aether-border bg-transparent z-10">
@@ -29,12 +44,11 @@ export function Header({ title, connected }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="w-48">
-          {/* We'll pass the actual model value from store later */}
+        <div className="w-56">
           <Select 
-            value="claude" 
-            onChange={() => {}} 
-            options={mockOptions} 
+            value={activeModel || modelOptions[0]?.value} 
+            onChange={handleModelChange} 
+            options={modelOptions} 
             className="h-8 py-1 bg-transparent border-aether-border hover:bg-aether-surface-1"
           />
         </div>

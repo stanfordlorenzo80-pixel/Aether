@@ -55,45 +55,105 @@ class ProviderRegistry:
 
         return self.get_default_provider()
 
+    def _get_provider_status(self, name: str) -> str:
+        """Map connection tuple to a frontend-friendly status string."""
+        status = self._connection_status.get(name)
+        if status is None:
+            return "disconnected"
+        if status[0]:
+            return "connected"
+        # Has been tested but failed
+        provider = self._providers.get(name)
+        if provider and provider.status == "error":
+            return "error"
+        return "disconnected"
+
     def list_providers(self) -> list[dict[str, Any]]:
+        """Return providers with nested models — matches frontend ProviderInfo shape."""
         results: list[dict[str, Any]] = []
         for name, provider in self._providers.items():
-            status = self._connection_status.get(name)
-            
-            # Using tuple (success, latency, error) logic correctly
-            if status is not None:
-                availability = "available" if status[0] else "unavailable"
-            else:
-                availability = "unknown"
+            status_tuple = self._connection_status.get(name)
+            pstatus = self._get_provider_status(name)
 
-            results.append(
-                {
-                    "name": name,
-                    "type": provider.type,
-                    "status": availability,
-                    "latency_ms": round(status[1], 1) if status else 0.0,
-                    "error": status[2] if status and not status[0] else "",
-                }
-            )
+            # Build nested model list (ALWAYS include models regardless of connection)
+            models = []
+            for m in provider.models:
+                models.append({
+                    "id": m.id,
+                    "name": m.name,
+                    "provider": name,
+                    "contextWindow": m.context_window,
+                    "description": m.description,
+                    "capabilities": m.capabilities,
+                })
+
+            results.append({
+                "id": name,
+                "name": provider.name,
+                "type": provider.type,
+                "status": pstatus,
+                "models": models,
+                "latency_ms": round(status_tuple[1], 1) if status_tuple else 0.0,
+                "error": status_tuple[2] if status_tuple and not status_tuple[0] else "",
+            })
         return results
 
-    async def list_all_models(self) -> list[ModelInfo]:
-        all_models: list[ModelInfo] = []
-        for provider in self._providers.values():
-            status = self._connection_status.get(provider.name)
-            if status is not None and not status[0]:
-                continue
-            try:
-                # Most models are fetched during initialize() into self.models
-                if hasattr(provider, "models"):
-                    all_models.extend(provider.models)
-            except Exception:  # noqa: BLE001
-                logger.debug("Failed to list models for provider %s", provider.name)
+    async def list_all_models(self) -> list[dict[str, Any]]:
+        """Flat list of ALL models across ALL providers (regardless of connection)."""
+        all_models: list[dict[str, Any]] = []
+        for name, provider in self._providers.items():
+            for m in provider.models:
+                all_models.append({
+                    "id": m.id,
+                    "name": m.name,
+                    "provider": name,
+                    "contextWindow": m.context_window,
+                    "description": m.description,
+                    "capabilities": m.capabilities,
+                })
         return all_models
+
+    def update_api_key(self, provider_name: str, api_key: str) -> bool:
+        """Hot-swap an API key for a provider."""
+        provider = self._providers.get(provider_name)
+        if provider is None:
+            return False
+        if hasattr(provider, "set_api_key"):
+            provider.set_api_key(api_key)
+            return True
+        return False
+
+    def update_ollama_url(self, url: str) -> bool:
+        """Hot-swap the Ollama base URL."""
+        provider = self._providers.get("ollama")
+        if provider is None:
+            return False
+        if hasattr(provider, "set_base_url"):
+            provider.set_base_url(url)
+            return True
+        return False
+
+    async def refresh_provider(self, name: str) -> dict[str, Any]:
+        """Re-initialize and re-test a single provider."""
+        provider = self._providers.get(name)
+        if provider is None:
+            return {"success": False, "error": "Provider not found"}
+        
+        await provider.initialize()
+        status = await provider.test_connection()
+        self._connection_status[name] = status
+        
+        return {
+            "success": status[0],
+            "latency_ms": round(status[1], 1),
+            "error": status[2],
+            "models_count": len(provider.models),
+        }
 
     async def initialize(self) -> None:
         logger.info("Initialising provider registry …")
 
+        # ── Claude ───────────────────────────────────────────────────────
         claude = ClaudeProvider()
         await claude.initialize()
         self.register(claude)
@@ -104,6 +164,7 @@ class ProviderRegistry:
         else:
             logger.warning("✗ Claude not connected: %s", claude_status[2])
 
+        # ── Ollama ───────────────────────────────────────────────────────
         ollama = OllamaProvider()
         await ollama.initialize()
         self.register(ollama)
@@ -114,6 +175,7 @@ class ProviderRegistry:
         else:
             logger.debug("Ollama not detected — skipping local provider")
             
+        # ── OpenRouter ───────────────────────────────────────────────────
         openrouter = OpenRouterProvider()
         await openrouter.initialize()
         self.register(openrouter)
@@ -125,7 +187,11 @@ class ProviderRegistry:
             logger.warning("✗ OpenRouter not connected: %s", openrouter_status[2])
 
         connected = [n for n, s in self._connection_status.items() if s[0]]
-        logger.info("Registry ready — %d provider(s) connected: %s", len(connected), ", ".join(connected) or "none")
+        total_models = sum(len(p.models) for p in self._providers.values())
+        logger.info(
+            "Registry ready — %d provider(s) connected, %d total models: %s",
+            len(connected), total_models, ", ".join(connected) or "none"
+        )
 
     async def shutdown(self) -> None:
         logger.info("Shutting down provider registry …")

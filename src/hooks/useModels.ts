@@ -24,18 +24,22 @@ export function useModels() {
       if (data.length > 0) {
         let foundActive = false;
         for (const p of data) {
-          if (p.models.some(m => m.id === activeModel)) {
+          if (p.models && p.models.some(m => m.id === activeModel)) {
             foundActive = true;
             break;
           }
         }
         
         if (!foundActive) {
-          // Try to find the default model, otherwise pick the first available
-          let nextProvider = data.find(p => p.id === DEFAULT_PROVIDER) || data[0];
-          let nextModel = nextProvider.models.find(m => m.id === DEFAULT_MODEL) || nextProvider.models[0];
+          // Try to find a provider with models, prefer connected ones
+          const connectedWithModels = data.find(p => p.status === 'connected' && p.models && p.models.length > 0);
+          const anyWithModels = data.find(p => p.models && p.models.length > 0);
+          const nextProvider = connectedWithModels || anyWithModels;
           
-          if (nextProvider && nextModel) {
+          if (nextProvider && nextProvider.models.length > 0) {
+            // Try default model first, then first available
+            const defaultModel = nextProvider.models.find(m => m.id === DEFAULT_MODEL);
+            const nextModel = defaultModel || nextProvider.models[0];
             setActiveModel(nextProvider.id, nextModel.id);
           }
         }
@@ -52,12 +56,15 @@ export function useModels() {
   }, [fetchProviders]);
 
   const testConnection = async (providerId: string) => {
-    return api.testConnection(providerId);
+    const result = await api.testConnection(providerId);
+    // Refresh providers after testing to get updated status
+    await fetchProviders();
+    return result;
   };
 
   // Flatten models for dropdowns
   const allModels = providers.flatMap(p => 
-    p.models.map(m => ({ ...m, providerInfo: p }))
+    (p.models || []).map(m => ({ ...m, providerInfo: p }))
   );
 
   return {

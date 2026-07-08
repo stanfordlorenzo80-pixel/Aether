@@ -11,35 +11,58 @@ class OllamaProvider(BaseProvider):
         self.client = httpx.AsyncClient(timeout=5.0)
         
     async def initialize(self):
+        """Probe Ollama and pull its live model list."""
+        await self._fetch_models()
+
+    async def _fetch_models(self):
+        """Fetch models from the running Ollama instance."""
         try:
-            # Check 127.0.0.1 first
-            resp = await self.client.get(f"{self.base_url}/api/tags", timeout=2.0)
+            resp = await self.client.get(f"{self.base_url}/api/tags", timeout=3.0)
             if resp.status_code != 200:
                 # Fallback to localhost
                 self.base_url = "http://localhost:11434"
-                resp = await self.client.get(f"{self.base_url}/api/tags", timeout=2.0)
+                resp = await self.client.get(f"{self.base_url}/api/tags", timeout=3.0)
             
             if resp.status_code == 200:
                 data = resp.json()
+                raw_models = data.get("models", [])
                 self.models = [
                     ModelInfo(
                         m["name"],
-                        m["name"],
-                        8192, # default approx
-                        f"Local model: {m['name']}",
+                        m["name"].split(":")[0].title(),  # Pretty name
+                        int(m.get("details", {}).get("parameter_size", "8192").replace("B", "").replace("K", "000").replace("M", "000000")) if isinstance(m.get("details", {}).get("parameter_size"), str) else 8192,
+                        f"Local model via Ollama",
                         ["local"]
-                    ) for m in data.get("models", [])
+                    ) for m in raw_models
                 ]
                 self.status = "connected"
+            else:
+                self.status = "disconnected"
         except Exception:
-            self.status = "error"
-            
+            self.status = "disconnected"
+
+    def set_base_url(self, url: str):
+        """Hot-swap the Ollama base URL at runtime."""
+        self.base_url = url.rstrip("/")
+
     async def test_connection(self) -> Tuple[bool, float, str]:
         start = time.time()
         try:
-            resp = await self.client.get(self.base_url)
+            resp = await self.client.get(f"{self.base_url}/api/tags", timeout=3.0)
             latency = (time.time() - start) * 1000
             if resp.status_code == 200:
+                # Also refresh model list on successful test
+                data = resp.json()
+                raw_models = data.get("models", [])
+                self.models = [
+                    ModelInfo(
+                        m["name"],
+                        m["name"].split(":")[0].title(),
+                        8192,
+                        f"Local model via Ollama",
+                        ["local"]
+                    ) for m in raw_models
+                ]
                 self.status = "connected"
                 return True, latency, ""
             return False, latency, f"HTTP {resp.status_code}"
@@ -84,3 +107,6 @@ class OllamaProvider(BaseProvider):
         
         data = resp.json()
         return data["message"]["content"]
+
+    async def shutdown(self):
+        await self.client.aclose()

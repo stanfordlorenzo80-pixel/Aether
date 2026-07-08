@@ -37,8 +37,42 @@ export class AetherAPI {
     if (!res.ok) throw new Error('Failed to test connection');
     return res.json();
   }
-  
-  // Streaming chat is handled separately via useStream hook using standard fetch/SSE
+
+  async saveApiKey(provider: string, key: string): Promise<any> {
+    const res = await fetch(`${this.baseUrl}/api/settings/api-key`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ provider, key }),
+    });
+    if (!res.ok) throw new Error('Failed to save API key');
+    return res.json();
+  }
+
+  async setOllamaUrl(url: string): Promise<any> {
+    const res = await fetch(`${this.baseUrl}/api/settings/ollama-url`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
+    if (!res.ok) throw new Error('Failed to update Ollama URL');
+    return res.json();
+  }
+
+  async refreshProvider(providerId: string): Promise<any> {
+    const res = await fetch(`${this.baseUrl}/api/providers/refresh/${providerId}`, {
+      method: 'POST',
+    });
+    if (!res.ok) throw new Error('Failed to refresh provider');
+    return res.json();
+  }
+
+  async refreshAllProviders(): Promise<any> {
+    const res = await fetch(`${this.baseUrl}/api/providers/refresh`, {
+      method: 'POST',
+    });
+    if (!res.ok) throw new Error('Failed to refresh providers');
+    return res.json();
+  }
 }
 
 export const api = new AetherAPI('http://localhost:8420');

@@ -9,20 +9,35 @@ class ClaudeProvider(BaseProvider):
     def __init__(self):
         super().__init__("claude", "Anthropic Claude", "cloud")
         self.client = None
+        self._api_key = ""
         
     async def initialize(self):
-        # We'll set up the client, even if API key is empty initially.
-        # It'll fail on test_connection or chat if invalid.
-        api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-        self.client = AsyncAnthropic(api_key=api_key)
+        self._api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+        if self._api_key:
+            self.client = AsyncAnthropic(api_key=self._api_key)
         
+        # Always register the model catalog regardless of key status
         self.models = [
             ModelInfo(
-                "claude-3-5-sonnet-20240620", 
-                "Claude 3.5 Sonnet", 
+                "claude-sonnet-4-20250514", 
+                "Claude Sonnet 4", 
                 200000, 
-                "Most intelligent model, balanced speed and cost",
+                "Latest and most intelligent Sonnet model",
+                ["vision", "tools", "fast", "reasoning"]
+            ),
+            ModelInfo(
+                "claude-3-5-sonnet-20241022", 
+                "Claude 3.5 Sonnet v2", 
+                200000, 
+                "Previous generation Sonnet, still excellent",
                 ["vision", "tools", "fast"]
+            ),
+            ModelInfo(
+                "claude-3-5-haiku-20241022", 
+                "Claude 3.5 Haiku", 
+                200000, 
+                "Fastest and most compact model",
+                ["vision", "fast"]
             ),
             ModelInfo(
                 "claude-3-opus-20240229", 
@@ -31,27 +46,30 @@ class ClaudeProvider(BaseProvider):
                 "Highest performance on complex tasks",
                 ["vision", "tools", "reasoning"]
             ),
-            ModelInfo(
-                "claude-3-haiku-20240307", 
-                "Claude 3 Haiku", 
-                200000, 
-                "Fastest and most compact model",
-                ["vision", "fast"]
-            )
         ]
-        self.status = "connected" if api_key else "disconnected"
+        self.status = "connected" if self._api_key else "disconnected"
+
+    def set_api_key(self, key: str):
+        """Hot-swap API key at runtime."""
+        self._api_key = key
+        os.environ["ANTHROPIC_API_KEY"] = key
+        if key:
+            self.client = AsyncAnthropic(api_key=key)
+            self.status = "connected"
+        else:
+            self.client = None
+            self.status = "disconnected"
         
     async def test_connection(self) -> Tuple[bool, float, str]:
-        if not self.client:
-            return False, 0.0, "Client not initialized"
+        if not self.client or not self._api_key:
+            return False, 0.0, "API key not configured"
             
         start = time.time()
         try:
-            # Minimal request to test auth
             await self.client.messages.create(
                 max_tokens=10,
                 messages=[{"role": "user", "content": "hello"}],
-                model="claude-3-haiku-20240307"
+                model="claude-3-5-haiku-20241022"
             )
             latency = (time.time() - start) * 1000
             self.status = "connected"
@@ -62,7 +80,7 @@ class ClaudeProvider(BaseProvider):
             
     async def stream_chat(self, model_id: str, messages: List[dict]) -> AsyncGenerator[str, None]:
         if not self.client:
-            raise ValueError("Anthropic client not configured")
+            raise ValueError("Anthropic API key not configured. Go to Settings to add your key.")
             
         async with self.client.messages.stream(
             max_tokens=4096,
@@ -74,7 +92,7 @@ class ClaudeProvider(BaseProvider):
 
     async def chat(self, model_id: str, messages: List[dict]) -> str:
         if not self.client:
-            raise ValueError("Anthropic client not configured")
+            raise ValueError("Anthropic API key not configured. Go to Settings to add your key.")
             
         response = await self.client.messages.create(
             max_tokens=4096,
@@ -82,3 +100,6 @@ class ClaudeProvider(BaseProvider):
             model=model_id
         )
         return response.content[0].text
+
+    async def shutdown(self):
+        pass
